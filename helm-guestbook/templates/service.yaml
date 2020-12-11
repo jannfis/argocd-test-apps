@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "helm-guestbook.fullname" . }}
+  labels:
+    app: {{ template "helm-guestbook.name" . }}
+    chart: {{ template "helm-guestbook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "helm-guestbook.name" . }}
+    release: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation
+  name: {{ template "helm-guestbook.fullname" . }}
+subsets:
+  - addresses:
+      - ip: 10.152.183.111
+    ports:
+      - port: 9376
